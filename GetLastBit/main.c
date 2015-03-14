@@ -1,3 +1,9 @@
+/**
+Dietrich Dorner, in his study of decision-making in complex environments,
+argues that Failure does not strike like a bolt from the blue; it develops
+gradually according to its own logic.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -11,6 +17,10 @@ void TestBinString();
 void TestSetMessageBit();
 void TestGetCharFromArray();
 void TestPutCharIntoArray();
+void TestPutGetIntoArray();
+
+#define TORFSTR(a) (a ? "true" : "false")
+#define PRINTC(a) (isprint(a) ? a : '.')
 
 
 //============================================================================
@@ -22,6 +32,7 @@ int main(int argc, char *argv[])
     TestSetMessageBit();
     TestGetCharFromArray();
     TestPutCharIntoArray();
+    TestPutGetIntoArray();
 
     return 0;
 }
@@ -187,7 +198,8 @@ void TestGetCharFromArrayEx(const char *fname, const int line, char *pixArray,
         printf("} == (0x%02x) %c: ", result, result);
         if (sz >= 8) 
         {
-            printf("ch (0x%02x) == outChar (0x%02x) : %s\n", (char)ch, (char)outChar, ch == outChar ? "true" : "false");
+            ch = (char)ch; outChar = (char)outChar;
+            printf("ch (0x%02x) == outChar (0x%02x) : %s\n", ch, outChar, TORFSTR(ch == outChar));
             assert(ch == (char)outChar); 
         }
     }
@@ -255,7 +267,7 @@ void TestPutCharIntoArrayEx(const char *fname, const int line, char *srcArray,
         memcpy(tmpArray, srcArray, sz);
     }
     printf("\n[%s:%d]\nPut char (0x%02x) '%c' into array (0x%p) of size (%d): {\n", 
-        fname, line, msg, isprint(msg) ? msg : '.', srcArray, sz);
+        fname, line, msg, PRINTC(msg), srcArray, sz);
     if (tmpArray && (sz >= 1))
     {
         for (idx = 0; idx < sz; ++idx)
@@ -282,7 +294,7 @@ void TestPutCharIntoArrayEx(const char *fname, const int line, char *srcArray,
             printf("(0x%02.2x) \"%s\" : ",
                 (((int)tmpArray[idx]) & 0x000000ff), // horrible hack to ensure only 1 byte is printed
                 BinString(tmpArray[idx], buf, 9));      // the maths is fine, but the printf insists on 4 bytes
-            printf("%s\n", tmpArray[idx] == resArray[idx] ? "true" : "false");
+            printf("%s\n", TORFSTR(tmpArray[idx] == resArray[idx]));
             cmpRes = cmpRes && (tmpArray[idx] == resArray[idx]);
         }
         assert(cmpRes != 0);
@@ -300,16 +312,23 @@ void TestPutCharIntoArray()
 {
     char *nullArray = NULL; 
 
-    char test1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    char test2[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-    char test3[8] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
+    char  test1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    char  test2[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    char  test3[8] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
 
-    char result1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };   // test1 + 0x00
-    char result2[8] = { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 };   // test1 + 0xff
-    char result3[8] = { 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe };   // test2 + 0x00
-    char result4[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };   // test2 + 0xff
-    char result5[8] = { 0x00, 0x00, 0x02, 0x02, 0x04, 0x04, 0x06, 0x06 };   // test3 + 0x00
-    char result6[8] = { 0x01, 0x01, 0x03, 0x03, 0x05, 0x05, 0x07, 0x07 };   // test3 + 0xff
+    char  result1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  // test1 + 0x00
+    char  result2[8] = { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 };  // test1 + 0xff
+    char  result3[8] = { 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe };  // test2 + 0x00
+    char  result4[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };  // test2 + 0xff
+    char  result5[8] = { 0x00, 0x00, 0x02, 0x02, 0x04, 0x04, 0x06, 0x06 };  // test3 + 0x00
+    char  result6[8] = { 0x01, 0x01, 0x03, 0x03, 0x05, 0x05, 0x07, 0x07 };  // test3 + 0xff
+
+    char  result7[8] = { 0x00, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };  // test1 + 0x48 'H'
+    char  result8[8] = { 0x00, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01 };  // test1 + 0x49 'I'
+    char  result9[8] = { 0xfe, 0xff, 0xfe, 0xfe, 0xff, 0xfe, 0xfe, 0xfe };  // test2 + 0x48 'H'
+    char result10[8] = { 0xfe, 0xff, 0xfe, 0xfe, 0xff, 0xfe, 0xfe, 0xff };  // test2 + 0x49 'I'
+    char result11[8] = { 0x00, 0x01, 0x02, 0x02, 0x05, 0x04, 0x06, 0x06 };  // test3 + 0x48 'H'
+    char result12[8] = { 0x00, 0x01, 0x02, 0x02, 0x05, 0x04, 0x06, 0x07 };  // test3 + 0x48 'I'
 
     printf("\n----------------------------------------------------------------------------\n");
     printf("  Test PutCharIntoArray()\n");
@@ -329,11 +348,69 @@ void TestPutCharIntoArray()
     TESTPUTCHARINTOARRAY(test3, 8, 0x00, 0, result5);
     TESTPUTCHARINTOARRAY(test3, 8, 0xff, 0, result6);
 
+    TESTPUTCHARINTOARRAY(test1, 8, 'H', 0, result7);
+    TESTPUTCHARINTOARRAY(test1, 8, 'I', 0, result8);
+
+    TESTPUTCHARINTOARRAY(test2, 8, 'H', 0, result9);
+    TESTPUTCHARINTOARRAY(test2, 8, 'I', 0, result10);
+
+    TESTPUTCHARINTOARRAY(test3, 8, 'H', 0, result11);
+    TESTPUTCHARINTOARRAY(test3, 8, 'I', 0, result12);
+
     printf("\n----------------------------------------------------------------------------\n");
     printf("  Done.\n");
     printf("----------------------------------------------------------------------------\n\n");
 }
 
+
+//============================================================================
+#define TESTPUTGETARRAY(arr, sz, ch)                    \
+{                                                       \
+    char chOut = 0;                                     \
+    char *tmp = NULL;                                   \
+    if (arr && (sz > 1)) {                              \
+        tmp = (char*)malloc(sz*sizeof(char));           \
+        assert(tmp != NULL);                            \
+        memcpy(tmp, arr, sizeof(char)*sz);              \
+    }                                                   \
+    assert(PutCharIntoArray(tmp, sz, ch) == 0);         \
+    assert(GetCharFromArray(tmp, sz, &chOut) == 0);     \
+    printf("Compare input and output chars (0x%02x) '%c' == (0x%02x) '%c' == %s : ", \
+        (byte)ch, PRINTC(ch), (byte)chOut, PRINTC(chOut), TORFSTR((byte)ch == (byte)chOut)); \
+    assert((byte)ch == (byte)chOut);                    \
+    printf("[OK]\n");                                   \
+}
+
+void TestPutGetIntoArray()
+{
+    char *nullArray = NULL;
+
+    char test1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    char test2[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    char test3[8] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
+
+    printf("\n----------------------------------------------------------------------------\n");
+    printf("  Test PutGetIntoArray()\n");
+    printf("----------------------------------------------------------------------------\n");
+
+    TESTPUTGETARRAY(test1, 8, 0x00);
+    TESTPUTGETARRAY(test1, 8, 0xff);
+    TESTPUTGETARRAY(test2, 8, 0x00);
+    TESTPUTGETARRAY(test2, 8, 0xff);
+    TESTPUTGETARRAY(test3, 8, 0x00);
+    TESTPUTGETARRAY(test3, 8, 0xff);
+
+    TESTPUTGETARRAY(test1, 8, 'H');
+    TESTPUTGETARRAY(test1, 8, 'I');
+    TESTPUTGETARRAY(test2, 8, ' ');
+    TESTPUTGETARRAY(test2, 8, 'L');
+    TESTPUTGETARRAY(test3, 8, 'O');
+    TESTPUTGETARRAY(test3, 8, 'W');
+
+    printf("\n----------------------------------------------------------------------------\n");
+    printf("  Done.\n");
+    printf("----------------------------------------------------------------------------\n\n");
+}
 
 //============================================================================
 void DumpArray(char *arrayData, int len)
@@ -349,15 +426,7 @@ void DumpArray(char *arrayData, int len)
             printf("\n");
         }
         c = arrayData[idx];
-        printf("(0x%2x)", c);
-        if (isprint(c))
-        {
-            printf("%c", c);
-        }
-        else
-        {
-            printf(".");
-        }
+        printf("(0x%2x) %c", c, PRINTC(c));
     }
     printf("\n\n");
 }
