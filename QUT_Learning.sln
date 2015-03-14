@@ -35,6 +35,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shellie_embed_test", "shell
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestEmbed", "TestEmbed\TestEmbed.vcxproj", "{5F2E9647-8EDA-418F-A36A-B4BE4B369AD0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "david_embed", "david_embed\david_embed.vcxproj", "{3B00B795-EE7B-4D54-9580-EF852C905CBB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "checksum", "checksum\checksum.vcxproj", "{82013DDC-87C1-4C33-93D4-82DC00B07DBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -105,6 +109,14 @@ Global
 		{5F2E9647-8EDA-418F-A36A-B4BE4B369AD0}.Debug|Win32.Build.0 = Debug|Win32
 		{5F2E9647-8EDA-418F-A36A-B4BE4B369AD0}.Release|Win32.ActiveCfg = Release|Win32
 		{5F2E9647-8EDA-418F-A36A-B4BE4B369AD0}.Release|Win32.Build.0 = Release|Win32
+		{3B00B795-EE7B-4D54-9580-EF852C905CBB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3B00B795-EE7B-4D54-9580-EF852C905CBB}.Debug|Win32.Build.0 = Debug|Win32
+		{3B00B795-EE7B-4D54-9580-EF852C905CBB}.Release|Win32.ActiveCfg = Release|Win32
+		{3B00B795-EE7B-4D54-9580-EF852C905CBB}.Release|Win32.Build.0 = Release|Win32
+		{82013DDC-87C1-4C33-93D4-82DC00B07DBD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{82013DDC-87C1-4C33-93D4-82DC00B07DBD}.Debug|Win32.Build.0 = Debug|Win32
+		{82013DDC-87C1-4C33-93D4-82DC00B07DBD}.Release|Win32.ActiveCfg = Release|Win32
+		{82013DDC-87C1-4C33-93D4-82DC00B07DBD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

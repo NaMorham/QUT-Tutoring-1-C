@@ -179,7 +179,7 @@ int PutCharIntoArray(char *pixels, const int pixelsSize, char msgChar)
     }
 
     // loop through the array backwards
-    for (c = msgChar, idx = 7; idx >= 0; --idx)
+    for (c = msgChar, idx = 0; idx < 8; ++idx)
     {
         pix = pixels[idx];      // the pixel (image component) to hold the encoded bit
         pix &= pixMask;         // the pixel with the last bit set to 0
