@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <exception>
-
+#include <stdexcept>
 #include "Currency.h"
 
 // declarations

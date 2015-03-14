@@ -14,6 +14,8 @@ static void ValTest() {}
 #endif
 
 extern void TestEnumClass();
+extern void TestAccounts();
+extern void TestBankingManager();
 
 int main(int argc, char *argv[])
 {
@@ -24,6 +26,10 @@ int main(int argc, char *argv[])
     TestEnumClass();
 
     ValTest();
+
+    TestAccounts();
+
+    TestBankingManager();
 
     return 0;
 }

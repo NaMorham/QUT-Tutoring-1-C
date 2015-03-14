@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{934F9562-B701-43EB-9B1A-D552969A9966}</ProjectGuid>
+    <ProjectGuid>{7D3E1CAC-9E01-438F-A24E-5E310AF3E5F3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>CPPTest</RootNamespace>
+    <RootNamespace>malloc_example</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -51,16 +51,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
-      <BrowseInformation>true</BrowseInformation>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <Bscmake>
-      <PreserveSbr>true</PreserveSbr>
-    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -70,7 +66,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -80,26 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Account.cpp" />
-    <ClCompile Include="AccountManager.cpp" />
-    <ClCompile Include="AccountTest.cpp" />
-    <ClCompile Include="BankingManager.cpp" />
-    <ClCompile Include="BankingManagerTest.cpp" />
-    <ClCompile Include="Currency.cpp" />
-    <ClCompile Include="CurrencyTest.cpp" />
-    <ClCompile Include="Customer.cpp" />
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Account.h" />
-    <ClInclude Include="AccountManager.h" />
-    <ClInclude Include="BankingManager.h" />
-    <ClInclude Include="Currency.h" />
-    <ClInclude Include="Customer.h" />
-    <ClInclude Include="Task.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="makefile" />
+    <ClCompile Include="malloc_example.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

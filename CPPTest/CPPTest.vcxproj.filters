@@ -30,6 +30,18 @@
     <ClCompile Include="Account.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AccountTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BankingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BankingManagerTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AccountManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Currency.h">
@@ -41,5 +53,17 @@
     <ClInclude Include="Account.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BankingManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AccountManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Task.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="makefile" />
   </ItemGroup>
 </Project>

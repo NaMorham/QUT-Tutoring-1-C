@@ -1,5 +1,6 @@
 #include "Currency.h"
 #include <exception>
+#include <stdexcept>
 
 // ---------------------------------------------------------------------------
 // Currency Data class
