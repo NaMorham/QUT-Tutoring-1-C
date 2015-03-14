@@ -33,7 +33,8 @@ public:
 
     // Update the amount owing by adding the specified difference
     const double &UpdateAmountOwing(const double &diff);
-    const double CalculateInterest() const;
+    const double CalculateInterest() const; // Calculate the amount of interest per day
+    const double &UpdateInterestPending();  // Update pending interest amount with calculated interest
 
 private:
     Account(const uint32_t accountNum, const std::string &name, 

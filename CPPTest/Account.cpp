@@ -62,6 +62,16 @@ const double &Account::UpdateAmountOwing(const double &diff)
 
 const double Account::CalculateInterest() const
 {
-    return 0.0;
+    // proper interest calculation should take date and time difference into account
+    // this assumes that the function is only called once a day
+    double interestPerDay = m_interestRate / 365;
+    double interest = ((m_amountOutstanding + m_interestPending) * interestPerDay);
+    
+    return interest;
 }
 
+const double &Account::UpdateInterestPending()
+{
+    m_interestPending += CalculateInterest();
+    return m_interestPending;
+}
