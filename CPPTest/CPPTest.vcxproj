@@ -80,7 +80,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Account.cpp" />
     <ClCompile Include="Currency.cpp" />
+    <ClCompile Include="CurrencyTest.cpp" />
     <ClCompile Include="Customer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
