@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A11D535F-1723-434E-9CDC-DC0080999E96}</ProjectGuid>
+    <ProjectGuid>{8AC33609-3549-444E-8294-AD2AEA37D698}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>jen_assign1</RootNamespace>
+    <RootNamespace>a_read_test</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -76,12 +76,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\a_read_test\a.read.c" />
-    <ClCompile Include="assignment_1.c" />
-    <ClCompile Include="main.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="assignment_1.h" />
+    <ClCompile Include="..\andrew_assign\a.read.c" />
+    <ClCompile Include="..\andrew_assign\a.write.c" />
+    <ClCompile Include="a.read.main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

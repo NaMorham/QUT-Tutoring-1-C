@@ -5,6 +5,7 @@
 #endif
 #include <assert.h>
 
+#define GETMIN(a, b) (a < b ? a : b)
 
 // assumes the buffer is not NULL and size is valid
 static void *ClearMem(void *buf, const unsigned char fill, const size_t sz)
@@ -35,7 +36,7 @@ static const size_t GetStringLength(const char *str)
 #else
     size_t idx = 0;
     while (str[idx++] != 0);
-    return idx;
+    return idx-1; // dont count the 0
 #endif
 }
 
@@ -73,7 +74,7 @@ static char *AllocAndCopyString(const char *str)
 {
 #ifdef _ALLOW_STRING_H_
     assert(str != NULL);
-    return strdup(str);
+    return _strdup(str);
 #else
     size_t len = 0;
     size_t idx = 0;
@@ -134,6 +135,21 @@ int checksum(char* data_string, char* key_string, char** checksum_string)
         printf("NULL pointer passed to checksum function.\n");
         return -1;
     }
+    if (*data_string == 0)
+    {
+        printf("Empty string passed as data\n");
+        return -1;
+    }
+    if (*key_string == 0)
+    {
+        printf("Empty string passed as key\n");
+        return -1;
+    }
+    if (*checksum_string != NULL)
+    {
+        printf("checksum string pointer may already be allocated\n");
+        return -1;
+    }
 
     // because data_string is possibly REALLY a const (STUPID HEAD SHOULD MAKE THIS CONST) we need a copy to mangle
     data = AllocAndCopyString(data_string);
@@ -146,13 +162,14 @@ int checksum(char* data_string, char* key_string, char** checksum_string)
     dataLen = GetStringLength(data);
     keyLen = GetStringLength(key_string);
     last = dataLen - keyLen;
+    printf("Final string = %s\n", data + last);
 
     printf("data_string = \"%s\"\n", data);
 
     pos = FindFirstChar(data, '1');
     if (pos == NULL)
     {
-        printf("No 1's in data string, return the last %d chars of data_string\n", keyLen-1);
+        printf("No 1's in data string, return the last %d chars of data_string\n", (int)keyLen-1);
         SAFEFREE(data);
         *checksum_string = AllocAndCopyString(data_string + last + 1);
         if (*checksum_string == NULL)
@@ -167,20 +184,29 @@ int checksum(char* data_string, char* key_string, char** checksum_string)
     while (pos)
     {
         idx = pos - data;
-        printf("\nFound '1' at idx = %d\n", idx);
-        printf("1. chksum: %s\n", data);
-        printf("      key: %*s%s\n", idx, " ", key_string);
-        if (idx >= last)
+        if (idx > last)
         {
             // we've reached end
             break;
         }
+        printf("\nFound '1' at idx = %d\n", (int)idx);
+        printf("1. chksum: %s\n", data);
+        printf("      key: %c%*s%s\n", (idx ? ' ' : '\b'), (int)idx-1, " ", key_string);
         XORKey(pos, key_string, keyLen);
         printf("2. chksum: %s\n", data);
         pos = FindFirstChar(data, '1');
     }
-    // we have reduced the list to a small group
+    // we have reduced the list to a small group 
     // return the last keyLen-1 chars
+//*
+    if (idx == last && 0)
+    {
+        printf("\n1. chksum: %s\n", data);
+        printf("      key: %c%*s%s\n", (idx ? ' ' : '\b'), (int)idx - 1, " ", key_string);
+        XORKey(data + last, key_string, keyLen);
+        printf("2. chksum: %s\n", data);
+    }
+//*/
     *checksum_string = AllocAndCopyString(data + last + 1);
     SAFEFREE(data);
     if (*checksum_string == NULL)

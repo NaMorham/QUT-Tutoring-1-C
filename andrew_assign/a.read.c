@@ -1,8 +1,10 @@
-#include "assignment_1.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #define  BUF_SIZE 64
 
-static const char *ReadVal(FILE *fp, char *buf, const size_t bufSize);
+const char *ReadVal(FILE *fp, char *buf, const size_t bufSize);
 
 
 int read_image(char* file_name, char** image_data, int* width, int* height)
@@ -158,7 +160,7 @@ cleanup:
     return arraySize;
 }
 
-// return -1 on fail
+// return NULL on fail
 const char *ReadVal(FILE *fp, char *buf, const size_t bufSize)
 {
     size_t idx = 0;
