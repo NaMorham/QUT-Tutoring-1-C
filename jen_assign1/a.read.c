@@ -1,4 +1,3 @@
-
 #include "assignment_1.h"
 
 #define  BUF_SIZE 64
