@@ -35,7 +35,7 @@ int write_image(char* file_name, int width, int height, char* image_data, int da
     //Write format letter 'P'
     fputc('P', newFile);
     //Write format integer {2,3,5,6}
-    convertToAscii(newFile, format, ' ');
+    convertToAscii(newFile, (height * width) == data_length ? 5 : 6, ' ');
 
     //Write width into file
     convertToAscii(newFile, width, ' ');

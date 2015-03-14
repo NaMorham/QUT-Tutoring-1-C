@@ -68,10 +68,9 @@ const byte SetMessageBit(const byte pixel, const byte messageBit)
 /**
  * 
  */
-int GetCharFromArray(const char *pixels, const int pixelsSize, char *pChar)
+int GetCharFromArray(char *pixels, const int pixelsSize, char *pChar)
 {
     int idx = 0;
-    int shift = 0;
     char result = 0;
     char c = 0;
 
@@ -89,19 +88,63 @@ int GetCharFromArray(const char *pixels, const int pixelsSize, char *pChar)
     }
 
     // loop through 8 chars in the pixel array
-    for (idx = 0, shift = 7; (idx < 8) && (shift >= 0); ++idx, --shift)
+    for (idx = 0; idx < 8; ++idx)
     {
         // extract the last bit, 
         c = pixels[idx];
         c &= bitMask;
-        // shift left if not the first loop
+
+        // bitwise or with result
         if (idx > 0)
         {
-            c = c << shift;
+            // shift left if not the first loop
+            result <<= 1;
         }
-        // bitwise or with result
+
         result |= c;
     }
     *pChar = result;
     return 0;
 }
+
+
+/**
+*
+*/
+int PutCharIntoArray(char *pixels, const int pixelsSize, char msgChar)
+{
+    int idx = 0;
+    char result = 0;
+    char c = 0;
+    char maskC = 0;
+    char pix = 0;
+
+    if (pixels == NULL)
+    {
+        return -1;  // nothing to read from
+    }
+    if (pixelsSize < 8)
+    {
+        return -1; // not enough room for a character
+    }
+    if (GetMaxChars(pixelsSize) < 1)
+    {
+        return -1;  // not enough to read from 
+    }
+
+    // loop through the array backwards
+    for (c = msgChar, idx = 7; idx >= 0; --idx)
+    {
+        pix = pixels[idx];      // the pixel (image component) to hold the encoded bit
+        pix &= pixMask;         // the pixel with the last bit set to 0
+
+        // now we need to get the right most bit
+        maskC = c & bitMask;    // the msg char with all but the last bit as 0
+
+        // combine the 2
+        pixels[idx] = pix | maskC;
+        c >>= 1;
+    }
+    return 0;
+}
+

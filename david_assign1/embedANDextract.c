@@ -40,7 +40,7 @@ int embed(char* image_data, int data_length, char* message, char** encoded)
 	size_t messagelen = 0;
 	
 	messagelen = strlen(message);
-	if (data_length/8 < messagelen)
+	if (data_length/8 < (int)messagelen)
 	{
 		printf("Message wont fit\n");
 		return -1;
@@ -71,7 +71,7 @@ int embed(char* image_data, int data_length, char* message, char** encoded)
 			free(encArray);
 			return -1;
 		}
-		if(messageidx >= messagelen)
+		if(messageidx >= (int)messagelen)
 		{
 			printf("Message has been coded\n");
 			break;

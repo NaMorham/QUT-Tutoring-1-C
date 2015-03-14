@@ -1,14 +1,17 @@
 #include "assignment_1.h"
 
 //  COPY EVERYTHING IN AND HOPE IT WORKS 
-
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
+#define buffsize 256
+
 /*================================================*/
 // functions for the read functions
+int readDIMs(FILE* dims, int* width, int* height, int* intensity);
 int readgrey(FILE* imgfile, char** image_data, int* width, int* height);
 int readRGB(FILE* imgfile, char** image_data, int* width, int* height);
 int readASCIIgrey(FILE* imgfile, char** image_data, int* width, int* height);
@@ -342,10 +345,9 @@ char* readTOspace(FILE* file, char* buff, int size)
 			if (idx>=size)
 			{
 				return NULL;
-			}
-		
+			}		
 		}
-	 
+        return NULL;
 	}
 	else
 	{
@@ -368,13 +370,13 @@ int scanint(char* str, int* val)
 }
 
 /*================================*/
+
 int readDIMs(FILE* dims, int* width, int* height, int* intensity)
 {// call read to space 3 times and atoi function from strings.h
 
 	int w = 0;
 	int h = 0;
 	int itn = 0;
-	int buffsize = 10;
 	
 	char buff[buffsize+1];
 	memset(buff, 0, (buffsize+1)*sizeof(char));
@@ -473,7 +475,6 @@ int write_image(char* file_name, int width, int height, char* image_data, int da
 	{//assume that all parameters are valid
 	
 	static const char* type = "P5";//grey binary file
-	static const int buffsize = 256;
 	char buff [buffsize+1];
 	int strlength = 0;
 	int maxval = 127;
@@ -481,8 +482,12 @@ int write_image(char* file_name, int width, int height, char* image_data, int da
 	
 	memset(buff,0,(buffsize+1)*sizeof(char));
 	maxval = findMAXval(image_data,  data_length);
-		
-	strlength = snprintf(buff,buffsize,"%s %d %d %d\n",type,width,height,maxval);
+	
+#ifdef _MSC_VER
+    strlength = _snprintf_s(buff, buffsize, _TRUNCATE, "%s %d %d %d\n", type, width, height, maxval);
+#else
+    strlength = snprintf(buff, buffsize, "%s %d %d %d\n", type, width, height, maxval);
+#endif
 	printf("%d %s\n", strlength, buff);
 	
 	if(buff[0] == 0 || strlength < 8) //minimum length P5.1.1.1 ie 8places
@@ -514,7 +519,6 @@ int writeRGB(FILE* imgfile, int width, int height, char* image_data, int data_le
 	{//assume that all parameters are valid
 	
 	static const char* type = "P6";//grey binary file
-	static const int buffsize = 256;
 	char buff [buffsize+1];
 	int strlength = 0;
 	int maxval = 127;
@@ -522,9 +526,13 @@ int writeRGB(FILE* imgfile, int width, int height, char* image_data, int data_le
 	
 	memset(buff,0,(buffsize+1)*sizeof(char));
 	maxval = findMAXval(image_data,  data_length);
-		
-	strlength = snprintf(buff,buffsize,"%s %d %d %d\n",type,width,height,maxval);
-	printf("%d %s\n", strlength, buff);
+	
+#ifdef _MSC_VER
+	strlength = _snprintf_s(buff,buffsize,_TRUNCATE,"%s %d %d %d\n",type,width,height,maxval);
+#else
+    strlength = snprintf(buff, buffsize, "%s %d %d %d\n", type, width, height, maxval);
+#endif
+    printf("%d %s\n", strlength, buff);
 	
 	if(buff[0] == 0 || strlength < 8) //minimum length P5.1.1.1 ie 8places
 	{
@@ -591,6 +599,7 @@ int writeRGB(FILE* imgfile, int width, int height, char* image_data, int data_le
 /*=========================================================================*/
 /*=========================================================================*/
 // EMBED FUNCTION
+#if 0
 int embed(char* image_data, int data_length, char* message, char** encoded)
 {
 /*
@@ -603,7 +612,7 @@ int embed(char* image_data, int data_length, char* message, char** encoded)
 	size_t messagelen = 0;
 	
 	messagelen = strlen(message);
-	if (data_length/8 < messagelen)
+	if (data_length/8 < (int)messagelen)
 	{
 		printf("Message wont fit\n");
 		return -1;
@@ -634,7 +643,7 @@ int embed(char* image_data, int data_length, char* message, char** encoded)
 			free(encArray);
 			return -1;
 		}
-		if(messageidx >= messagelen)
+		if(messageidx >= (int)messagelen)
 		{
 			printf("Message has been coded\n");
 			break;
@@ -736,7 +745,7 @@ takes the pixel array and a character and calls BolAdder 8 times
 */	
 	return 0;
 }
-
+#endif
 
 /*=========================================================================*/
 /*=========================================================================*/

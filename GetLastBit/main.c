@@ -10,7 +10,10 @@ void TestGetBitVals();
 void TestBinString();
 void TestSetMessageBit();
 void TestGetCharFromArray();
+void TestPutCharIntoArray();
 
+
+//============================================================================
 int main(int argc, char *argv[])
 {
     TestGetMaxChars();
@@ -18,9 +21,11 @@ int main(int argc, char *argv[])
     TestGetBitVals();
     TestSetMessageBit();
     TestGetCharFromArray();
+    TestPutCharIntoArray();
 
     return 0;
 }
+
 
 //============================================================================
 extern int GetMaxChars(int arraysize);
@@ -125,6 +130,7 @@ void TestGetBitVals()
     printf("----------------------------------------------------------------------------\n\n");
 }
 
+
 //============================================================================
 extern const byte SetMessageBit(const byte pixel, const byte messageBit);
 
@@ -158,29 +164,41 @@ void TestSetMessageBit()
     printf("----------------------------------------------------------------------------\n\n");
 }
 
-//============================================================================
-extern int GetCharFromArray(const char *pixels, const int pixelsSize, char *pChar);
 
-#define TESTGETCHARFROMARRAY(pixArray, sz, result, outChar)  \
-{                                                   \
-    char ch = 0, buf[9];                            \
-    int idx = 0, rc = 0;                            \
-    memset(buf, 0, sizeof(char)*9);                 \
-    rc = GetCharFromArray(pixArray, sz, &ch);       \
-    printf("[%s:%d] Get char from array (0x%p) of size (%d): {\n", __FILE__, __LINE__, pixArray, sz); \
-    if (pixArray && sz > 1) {                       \
-        for (idx = 0; idx < sz; ++idx) {            \
-            printf("    [%2d]: (0x%02x) \"%s\"\n",  \
-                    idx, pixArray[idx], BinString(pixArray[idx], buf, 9));   \
-        }                                           \
-        if (sz >= 8) { assert(ch = outChar); }      \
-    } else {                                        \
-        printf("    [Empty or invalid array]\n");   \
-    }                                               \
-    assert(rc = result);                            \
-    printf("} == (0x%02x) %c: ", result, result);   \
-    printf("[OK]\n\n");                             \
+//============================================================================
+extern int GetCharFromArray(char *pixels, const int pixelsSize, char *pChar);
+
+void TestGetCharFromArrayEx(const char *fname, const int line, char *pixArray,
+    const int sz, const int result, char outChar)
+{
+    char ch = 0, buf[9];
+    int idx = 0, rc = 0;
+    memset(buf, 0, sizeof(char) * 9);
+    rc = GetCharFromArray(pixArray, sz, &ch);
+    printf("[%s:%d] Get char from array (0x%p) of size (%d): {\n", fname, line, pixArray, sz);
+    if (pixArray && sz > 1) 
+    {
+        for (idx = 0; idx < sz; ++idx) 
+        {
+            printf("    [%2d]: (0x%02.2x) \"%s\"\n",
+                idx, (((int)pixArray[idx])&0x000000ff), // horrible hack to ensure only 1 byte is printed
+                BinString(pixArray[idx], buf, 9));      // the maths is fine, but the printf insists on 4 bytes
+        }
+        printf("} == (0x%02x) %c: ", result, result);
+        if (sz >= 8) 
+        {
+            printf("ch (0x%02x) == outChar (0x%02x) : %s\n", (char)ch, (char)outChar, ch == outChar ? "true" : "false");
+            assert(ch == (char)outChar); 
+        }
+    }
+    else 
+    {
+        printf("    [Empty or invalid array]\n");
+    }
+    assert(rc == result);
+    printf("[OK]\n\n");
 }
+#define TESTGETCHARFROMARRAY(pixArray, sz, result, outChar) TestGetCharFromArrayEx(__FILE__, __LINE__, pixArray, sz, result, outChar)
 
 void TestGetCharFromArray()
 {
@@ -188,6 +206,10 @@ void TestGetCharFromArray()
     char result = 0;
     char test1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     char test2[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    char test3[8] = { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 };
+    char test4[8] = { 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe };
+    char test5[8] = { 0xA1, 0xB0, 0xC1, 0xD0, 0xF1, 0xE0, 0x81, 0x70 };
+    char test6[8] = { 0xf0, 0xf1, 0xf0, 0xf0, 0xf1, 0xf0, 0xf0, 0xf1 };
 
     printf("\n----------------------------------------------------------------------------\n");
     printf("  Test GetCharFromArray()\n");
@@ -201,9 +223,12 @@ void TestGetCharFromArray()
     TESTGETCHARFROMARRAY(test1, -8, -1, 0x00);
 
     // Test valid data
-    //TESTGETCHARFROMARRAY(test1, 8, 0, 0x00);
-    //TESTGETCHARFROMARRAY(test2, 8, 0, 0xff);
-//    TESTGETCHARFROMARRAY(test1, 8, 0x00);
+    TESTGETCHARFROMARRAY(test1, 8, 0, 0x00);
+    TESTGETCHARFROMARRAY(test2, 8, 0, 0xff);
+    TESTGETCHARFROMARRAY(test3, 8, 0, 0xff);
+    TESTGETCHARFROMARRAY(test4, 8, 0, 0x00);
+    TESTGETCHARFROMARRAY(test5, 8, 0, 0xaa);
+    TESTGETCHARFROMARRAY(test6, 8, 0, 0x49);
 
     printf("----------------------------------------------------------------------------\n");
     printf("  Done.\n");
@@ -212,8 +237,105 @@ void TestGetCharFromArray()
 
 
 
+//============================================================================
+extern int PutCharIntoArray(char *pixels, const int pixelsSize, char msgChar);
+
+void TestPutCharIntoArrayEx(const char *fname, const int line, char *srcArray,
+    const int sz, char msg, const int result, char *resArray)
+{
+    char *tmpArray = NULL;
+    int rc = 0, idx = 0, cmpRes = 0;
+    char buf[9];
+
+    memset(buf, 0, sizeof(char) * 9);
+
+    if (srcArray && (sz > 0))
+    {
+        tmpArray = (char *)malloc(sizeof(char)*sz);
+        memcpy(tmpArray, srcArray, sz);
+    }
+    printf("\n[%s:%d]\nPut char (0x%02x) '%c' into array (0x%p) of size (%d): {\n", 
+        fname, line, msg, isprint(msg) ? msg : '.', srcArray, sz);
+    if (tmpArray && (sz >= 1))
+    {
+        for (idx = 0; idx < sz; ++idx)
+        {
+            printf("    [%2d]: (0x%02.2x) \"%s\"\n",
+                idx, (((int)tmpArray[idx]) & 0x000000ff), // horrible hack to ensure only 1 byte is printed
+                BinString(tmpArray[idx], buf, 9));      // the maths is fine, but the printf insists on 4 bytes
+        }
+    }
+    rc = PutCharIntoArray(tmpArray, sz, msg);
+    printf("  }  == %d : expecting %d\n", rc, result);
+    assert(rc == result);
+    if (result == 0)
+    {
+        cmpRes = 1; // assume true
+        // check resulting array matches the expected result
+        printf("Compare resulting array to expected result\n");
+        printf("       expected                       result\n");
+        for (idx = 0; idx < sz; ++idx)
+        {
+            printf("  [%2d]: (0x%02.2x) \"%s\" == ",
+                idx, (((int)resArray[idx]) & 0x000000ff), // horrible hack to ensure only 1 byte is printed
+                BinString(resArray[idx], buf, 9));      // the maths is fine, but the printf insists on 4 bytes
+            printf("(0x%02.2x) \"%s\" : ",
+                (((int)tmpArray[idx]) & 0x000000ff), // horrible hack to ensure only 1 byte is printed
+                BinString(tmpArray[idx], buf, 9));      // the maths is fine, but the printf insists on 4 bytes
+            printf("%s\n", tmpArray[idx] == resArray[idx] ? "true" : "false");
+            cmpRes = cmpRes && (tmpArray[idx] == resArray[idx]);
+        }
+        assert(cmpRes != 0);
+    }
+    if (tmpArray)
+    {
+        free(tmpArray);
+        tmpArray = NULL;
+    }
+}
+
+#define TESTPUTCHARINTOARRAY(srcArray, sz, msg, result, resArray) TestPutCharIntoArrayEx(__FILE__, __LINE__, srcArray, sz, msg, result, resArray)
+
+void TestPutCharIntoArray()
+{
+    char *nullArray = NULL; 
+
+    char test1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    char test2[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    char test3[8] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
+
+    char result1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };   // test1 + 0x00
+    char result2[8] = { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 };   // test1 + 0xff
+    char result3[8] = { 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe };   // test2 + 0x00
+    char result4[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };   // test2 + 0xff
+    char result5[8] = { 0x00, 0x00, 0x02, 0x02, 0x04, 0x04, 0x06, 0x06 };   // test3 + 0x00
+    char result6[8] = { 0x01, 0x01, 0x03, 0x03, 0x05, 0x05, 0x07, 0x07 };   // test3 + 0xff
+
+    printf("\n----------------------------------------------------------------------------\n");
+    printf("  Test PutCharIntoArray()\n");
+    printf("----------------------------------------------------------------------------\n");
+
+    TESTPUTCHARINTOARRAY(nullArray, 8, 0x00, -1, result1);
+    TESTPUTCHARINTOARRAY(test1, 0, 0x00, -1, result1);
+    TESTPUTCHARINTOARRAY(test1, -8, 0x00, -1, result1);
+    TESTPUTCHARINTOARRAY(test1, 3, 0x00, -1, result1);
+
+    TESTPUTCHARINTOARRAY(test1, 8, 0x00, 0, result1);
+    TESTPUTCHARINTOARRAY(test1, 8, 0xff, 0, result2);
+
+    TESTPUTCHARINTOARRAY(test2, 8, 0x00, 0, result3);
+    TESTPUTCHARINTOARRAY(test2, 8, 0xff, 0, result4);
+
+    TESTPUTCHARINTOARRAY(test3, 8, 0x00, 0, result5);
+    TESTPUTCHARINTOARRAY(test3, 8, 0xff, 0, result6);
+
+    printf("\n----------------------------------------------------------------------------\n");
+    printf("  Done.\n");
+    printf("----------------------------------------------------------------------------\n\n");
+}
 
 
+//============================================================================
 void DumpArray(char *arrayData, int len)
 {
     int idx = 0;

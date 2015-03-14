@@ -1,3 +1,5 @@
+#include <ctype.h>
+#include <assert.h>
 #include "assignment_1.h"
 
 void printimage( char* image_data, int data_length);
