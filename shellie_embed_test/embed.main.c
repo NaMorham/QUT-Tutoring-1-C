@@ -21,52 +21,36 @@ extern int EmbedChar(int arrsize, char eb, char* source, char* dest);
 extern int embed(char* image_data, int data_length, char* message, char** encoded);
 extern int read_image(char* file_name, char** image_data, int* width, int* height);
 
-void TestEmbedBit(char c, char* source, int arrsize, int resultf, char* resultem);
-void TestMaskBit(char Pixel, char Bit, char result);
-void TestEmbedChar(char* image_data, int data_length, char* message, int resultf, char* resultem);
-void TestFile();
+static void TestEmbedBit(char c, char* source, int arrsize, int resultf, char* resultem);
+static void TestMaskBit(char Pixel, char Bit, char result);
+static void TestEmbedChar(char* image_data, int data_length, char* message, int resultf, char* resultem);
+static void TestFile(char *fname, char *testStr, char *resultData);
 
 static void DumpDummy();
 static void TestMaskBits();
 static void TestEmbedChars();
+static void TestEmbedString();
+static void TestFiles();
 
 int main()
 {	
-    char test3char[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    char testmsg[] = "HI"; // 0x48 0x49    0100 1000  0100 1001
-    char test3result[] = { 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00,
-                           0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00,
-                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-
-    char *result = NULL;
-
     TestMaskBits();
 	printf("\n");
 
     TestEmbedChars();
     printf("\n");
 
-/*
-	TestEmbedChar(test1, 8, teststr1, 0, result1);
-	TestEmbedChar(test1, 8, teststr2, 0, result2);
-	TestEmbedChar(test1, 8, teststr3, 0, result5);
-	TestEmbedChar(test2, 8, teststr1, 0, result3);
-	TestEmbedChar(test2, 8, teststr2, 0, result4);
-	TestEmbedChar(test2, 8, teststr3, 0, result6);
+    TestEmbedString();
+    printf("\n");
 
-    TestEmbedChar(test3char, 24, testmsg, 0, result6);
-    */
-    TestFile();
+    TestFiles();
     
 	return 0;
 }
 
 
 //Test masking is ok.
-void TestMaskBit(char Pixel, char Bit, char result)
+static void TestMaskBit(char Pixel, char Bit, char result)
 {	
 	char c;
     char buf[9];
@@ -89,8 +73,8 @@ void TestMaskBit(char Pixel, char Bit, char result)
 		printf("Failed\n");
 }
 
-//Test masking is ok.
-void TestEmbedBit(char c, char* source, int arrsize, int resultf, char* resultem)
+//Test a char can be embedded in 8 pixels.
+static void TestEmbedBit(char c, char* source, int arrsize, int resultf, char* resultem)
 {	
 	int internal;
 	char* dest;
@@ -138,44 +122,44 @@ void TestEmbedBit(char c, char* source, int arrsize, int resultf, char* resultem
 
 
 //Test embedding is ok
-void TestEmbedChar(char* image_data, int data_length, char* message, int resultf, char* resultem)
+static void TestEmbedChar(char* image_data, int data_length, char* message, int resultf, char* resultem)
 {
-	char* encoded = NULL;
-	int rcembed;
-	int idx;
+    char* encoded = NULL;
+    int rcembed;
+    int idx;
 
-	rcembed=embed(image_data, data_length, message, &encoded);
+    rcembed = embed(image_data, data_length, message, &encoded);
 
-	if (rcembed!=resultf)
-	{
-		printf("Test Failed\n");
-		if (encoded!=NULL)
-		{	
-			free(encoded);
-			encoded=NULL;
-		}
-		return;
-	}
-	else 
-	{
-		printf("Yay it worked! WoooHoo!!!\n");
-	}
-    printf("Compare arrays:\n");
-	for (idx=0; idx < 8; idx++)
-	{
-		//This is an inline if where it prints each character from dest and resultem. 
-		//"dest[idx]==resultem[idx]?"True":"False"" is essentially an if statement returning true or false text.
-        printf("%02x == %02x (%s)\n", (unsigned char)encoded[idx], (unsigned char)resultem[idx], ((unsigned char)encoded[idx] == (unsigned char)resultem[idx] ? "True" : "False"));
-	}
-    if ((unsigned char)encoded[idx] != (unsigned char)resultem[idx])
+    if (rcembed != resultf)
     {
-        printf("that sucked\n");
+        printf("Test Failed\n");
+        if (encoded != NULL)
+        {
+            free(encoded);
+            encoded = NULL;
+        }
         return;
     }
     else
     {
-        printf("\n");
+        printf("Yay it worked! WoooHoo!!!\n");
     }
+    if (image_data != NULL)
+    {
+        printf("Compare arrays:\n");
+        printf("  encode:    result:");
+        for (idx = 0; idx < data_length; idx++)
+        {
+            if ((idx % 8) == 0)
+            {
+                printf("\n"); // extra blank line
+            }
+            //This is an inline if where it prints each character from dest and resultem. 
+            //"dest[idx]==resultem[idx]?"True":"False"" is essentially an if statement returning true or false text.
+            printf("%3d: 0x%02x == 0x%02x (%s)\n", idx, (unsigned char)encoded[idx], (unsigned char)resultem[idx], TORFSTR((unsigned char)encoded[idx] == (unsigned char)resultem[idx]));
+        }
+    }
+    printf("\n\n");
 
 	if (encoded!=NULL)
 	{
@@ -184,22 +168,10 @@ void TestEmbedChar(char* image_data, int data_length, char* message, int resultf
 	}
 }
 
-void TestFile()
+static void TestFile(char *fname, char *testStr, char *resultData)
 {
 	char* image_data=NULL;
 	char* encoded=NULL;
-    char expected[] = {
-        0x24, 0x60, 0x4f, 0x2f, 0x7a, 0x0f, 0x1f, 0x6a, 0x0f, 0x40,
-        0x18, 0x2a, 0x42, 0x5b, 0x59, 0x38, 0x3e, 0x01, 0x04, 0x22,
-        0x51, 0x09, 0x63, 0x26, 0x09, 0x7d, 0x5d, 0x54, 0x04, 0x2d,
-        0x51, 0x30, 0x51, 0x48, 0x15, 0x4e, 0x74, 0x4f, 0x11, 0x58,
-        0x2a, 0x42, 0x6c, 0x26, 0x7c, 0x7a, 0x5e, 0x72, 0x64, 0x30,
-        0x48, 0x51, 0x64, 0x21, 0x25, 0x2d, 0x55, 0x47, 0x2b, 0x25,
-        0x16, 0x1c, 0x68, 0x34, 0x61, 0x1a, 0x4f, 0x5f, 0x79, 0x12,
-        0x03, 0x26, 0x4f, 0x0a, 0x7b, 0x6d, 0x0f, 0x4e, 0x64, 0x2e
-    };
-    char test2[] = "large";
-    char fname[] = "../inputs/images/small_41.pgm";
     int arrsize;
 	int width;
 	int height;
@@ -209,18 +181,18 @@ void TestFile()
     memset(buf, 0, sizeof(char) * 9);
 
     printf("--------------------------------------\n");
-    printf("  Read image \"%s\"\n", fname);
-    arrsize = read_image("../inputs/images/small_41.pgm", &image_data, &width, &height);
+    printf(" Read image \"%s\"\n", fname);
+    arrsize = read_image(fname, &image_data, &width, &height);
     if (arrsize <= 0)
 	{
 		printf("Unable to read image.\n");
 		return;
 	}
     printf("--------------------------------------\n");
-    printf("Embed text in image\n", test2);
-    DumpBinString(test2);
+    printf("Embed text in image\n");
+    DumpBinString(testStr);
     printf("--------------------------------------\n");
-    if (embed(image_data, arrsize, test2, &encoded) == -1)
+    if (embed(image_data, arrsize, testStr, &encoded) == -1)
     {
         printf("Embed failed.\n");
         if (image_data != NULL)
@@ -236,7 +208,7 @@ void TestFile()
     }
 	
     printf("--------------------------------------\n");
-    printf("      image:              encoded:           expected:");
+    printf("          image:              encoded:           expected:");
 	for (idx=0; idx < arrsize; idx++)
 	{
         if ((idx % 8) == 0)
@@ -245,11 +217,11 @@ void TestFile()
         }
         printf("%3d: 0x%02x [%s] --> ", idx, (unsigned char)image_data[idx], BinString(image_data[idx], buf, 8));
         printf("0x%02x [%s] == ", (unsigned char)encoded[idx], BinString(encoded[idx], buf, 8));
-        printf("0x%02x [%s] : %s\n", (unsigned char)expected[idx], BinString(expected[idx], buf, 8), 
-            TORFSTR((unsigned char)encoded[idx] == (unsigned char)expected[idx]));
+        printf("0x%02x [%s] : %s\n", (unsigned char)resultData[idx], BinString(resultData[idx], buf, 8), 
+            TORFSTR((unsigned char)encoded[idx] == (unsigned char)resultData[idx]));
     }
 
-    printf("--------------------------------------\n");
+    printf("--------------------------------------\n\n");
 
 	if (image_data!=NULL)
 	{
@@ -392,6 +364,107 @@ static void TestEmbedChars()
     TestEmbedBit(0xFF, test2, 9, 0, result4);
     TestEmbedBit('I', test1, 9, 0, result5);
     TestEmbedBit('I', test2, 9, 0, result6);
+
+    printf("------------------------------\n");
+    printf("Done\n");
+    printf("------------------------------\n");
+}
+
+static void TestEmbedString()
+{
+    char test3char[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    char testmsg[] = "HI"; // 0x48 0x49    0100 1000  0100 1001
+    char test3result[] = { 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00,
+        0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    char *result = NULL;
+
+    char test1[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    char test2[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+                     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+
+    char teststr1[] = { 0, 0 };
+    char teststr2[] = { 0xff, 0 };
+    char teststr3[] = "I";  // 0x49    01001001
+
+    char result1[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //Test1 with 0x00
+    char result2[] = { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //Test1 with 0xFF
+
+    char result3[] = { 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //Test2 with 0x00
+    char result4[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //Test2 with 0xFF
+
+    char result5[] = { 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x00,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //Test1 with 'I'
+    char result6[] = { 0xff, 0xfe, 0xfe, 0xff, 0xfe, 0xfe, 0xff, 0xfe,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //Test2 with 'I'
+
+    printf("\n");
+    printf("------------------------------\n");
+    printf("Test Embed string functions\n");
+    printf("------------------------------\n");
+
+    // failure tests
+    TestEmbedChar(NULL, 16, teststr1, -1, result1);
+
+    // positive tests
+    TestEmbedChar(test1, 16, teststr1, 0, result1);
+    TestEmbedChar(test1, 16, teststr2, 0, result2);
+    TestEmbedChar(test1, 16, teststr3, 0, result5);
+    TestEmbedChar(test2, 16, teststr1, 0, result3);
+    TestEmbedChar(test2, 16, teststr2, 0, result4);
+    TestEmbedChar(test2, 16, teststr3, 0, result6);
+
+    TestEmbedChar(test3char, 24, testmsg, 0, result6);
+
+    printf("------------------------------\n");
+    printf("Done\n");
+    printf("------------------------------\n");
+}
+
+static void TestFiles()
+{
+    char small_25_expected[] = {
+        0x26, 0x2e, 0x65, 0x30, 0x2c, 0x05, 0x11, 0x30, 0x51, 0x34,
+        0x36, 0x6a, 0x5e, 0x21, 0x19, 0x3c, 0x5a, 0x0b, 0x79, 0x2f,
+        0x68, 0x61, 0x67, 0x64, 0x4d, 0x61, 0x4f, 0x48, 0x76, 0x4d,
+        0x29, 0x10, 0x63, 0x3a, 0x75, 0x28, 0x48, 0x27, 0x59, 0x7a,
+        0x62, 0x71, 0x14, 0x54, 0x7d, 0x31, 0x05, 0x5e, 0x61, 0x5b,
+        0x1f, 0x43, 0x0e, 0x61, 0x7b, 0x38, 0x23, 0x1e, 0x15, 0x06,
+        0x25, 0x51, 0x5b, 0x64, 0x19, 0x4d, 0x22, 0x16, 0x35, 0x7b,
+        0x2b, 0x7c, 0x34, 0x78, 0x7c, 0x58, 0x70, 0x1a, 0x5c, 0x72,
+        0x22, 0x36, 0x27, 0x24, 0x1b, 0x5b, 0x28, 0x66, 0x6f, 0x2e
+    };
+    char small_25_str[] = "dangerous";
+    char small_25_fname[] = "../inputs/images/small_25.pgm";
+
+    char small_41_expected[] = {
+        0x24, 0x60, 0x4f, 0x2f, 0x7a, 0x0f, 0x1f, 0x6a, 0x0f, 0x40,
+        0x18, 0x2a, 0x42, 0x5b, 0x59, 0x38, 0x3e, 0x01, 0x04, 0x22,
+        0x51, 0x09, 0x63, 0x26, 0x09, 0x7d, 0x5d, 0x54, 0x04, 0x2d,
+        0x51, 0x30, 0x51, 0x48, 0x15, 0x4e, 0x74, 0x4f, 0x11, 0x58,
+        0x2a, 0x42, 0x6c, 0x26, 0x7c, 0x7a, 0x5e, 0x72, 0x64, 0x30,
+        0x48, 0x51, 0x64, 0x21, 0x25, 0x2d, 0x55, 0x47, 0x2b, 0x25,
+        0x16, 0x1c, 0x68, 0x34, 0x61, 0x1a, 0x4f, 0x5f, 0x79, 0x12,
+        0x03, 0x26, 0x4f, 0x0a, 0x7b, 0x6d, 0x0f, 0x4e, 0x64, 0x2e
+    };
+    char small_41_str[] = "large";
+    char small_41_fname[] = "../inputs/images/small_41.pgm";
+
+    printf("\n");
+    printf("------------------------------\n");
+    printf("Test Embed string functions\n");
+    printf("------------------------------\n");
+    printf("\n");
+
+    TestFile(small_25_fname, small_25_str, small_25_expected);
+    TestFile(small_41_fname, small_41_str, small_41_expected);
 
     printf("------------------------------\n");
     printf("Done\n");
